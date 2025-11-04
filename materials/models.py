@@ -1,9 +1,17 @@
 from django.db import models
+from users.models import User
 
 class Course(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     preview = models.ImageField(upload_to="course_previews/", blank=True, null=True)
+    author = models.ForeignKey(User,
+        on_delete=models.CASCADE,
+        related_name="courses",
+        verbose_name="Автор",
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return self.title
