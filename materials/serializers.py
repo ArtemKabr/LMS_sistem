@@ -1,6 +1,8 @@
 from rest_framework import serializers
-from .models import Course, Lesson
+
 from users.models import User
+
+from .models import Course, Lesson
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -8,7 +10,8 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ["id", "title", "description", "preview", "author", "author_email"]
+        fields = ["id", "title", "description",
+                  "preview", "author", "author_email"]
 
     def get_author_email(self, obj):
         """Возвращает email автора, если он есть."""
