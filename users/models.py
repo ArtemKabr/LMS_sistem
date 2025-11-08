@@ -4,7 +4,6 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 
 
-
 class UserManager(BaseUserManager):
     """Кастомный менеджер пользователей с авторизацией по email."""
 
@@ -102,5 +101,3 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Платёж #{self.id} от {self.user.email} — {self.amount} руб."
-
-
