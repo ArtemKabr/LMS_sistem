@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from users.permissions import IsModer, IsOwner
 from .models import Course, Lesson
 from .serializers import CourseSerializer, LessonSerializer
+from .paginators import DefaultPagination
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -10,6 +11,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         """Модераторы видят все курсы, пользователи — только свои."""
@@ -42,6 +44,7 @@ class LessonViewSet(viewsets.ModelViewSet):
 
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         """Модераторы видят все уроки, пользователи — только свои."""
