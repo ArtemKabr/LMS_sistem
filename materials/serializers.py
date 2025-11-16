@@ -1,4 +1,5 @@
 # materials/serializers.py — сериализаторы курсов, уроков и платежей
+
 from rest_framework import serializers
 from .models import Course, Lesson, Subscription, Payment
 from .validators import validate_youtube_url

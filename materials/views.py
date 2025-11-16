@@ -1,7 +1,7 @@
 # materials/views.py — вьюхи курсов, уроков и платежей
 
 from rest_framework import viewsets, generics
-from rest_framework.permissions import IsAuthenticated, AllowAny   # ← ДОБАВИЛИ
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from users.permissions import IsModer, IsOwner
 from .models import Course, Lesson, Payment
 from .serializers import CourseSerializer, LessonSerializer, PaymentSerializer
@@ -11,7 +11,6 @@ from .services.stripe_service import (
     create_stripe_price,
     create_checkout_session,
 )
-
 
 
 class CourseViewSet(viewsets.ModelViewSet):
