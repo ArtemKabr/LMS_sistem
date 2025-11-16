@@ -15,6 +15,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from datetime import timedelta
+
 load_dotenv()
 
 
@@ -27,6 +29,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-m&7-4+y(c^o6^62zy-e_&9p$xh-q=92%t&081v&x%vruvh--tr"
+
+
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=365),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=3650),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
+}
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

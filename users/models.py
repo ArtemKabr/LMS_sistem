@@ -27,8 +27,7 @@ class UserManager(BaseUserManager):
         if extra_fields.get("is_staff") is not True:
             raise ValueError("Суперпользователь должен иметь is_staff=True.")
         if extra_fields.get("is_superuser") is not True:
-            raise ValueError(
-                "Суперпользователь должен иметь is_superuser=True.")
+            raise ValueError("Суперпользователь должен иметь is_superuser=True.")
 
         return self.create_user(email, password, **extra_fields)
 
@@ -68,18 +67,20 @@ class Payment(models.Model):
         related_name="payments",
         verbose_name="Пользователь",
     )
+
     date = models.DateTimeField(auto_now_add=True, verbose_name="Дата оплаты")
 
     paid_course = models.ForeignKey(
-        "materials.Course",  # ✅ строковая ссылка вместо Course
+        "materials.Course",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="course_payments",
         verbose_name="Оплаченный курс",
     )
+
     paid_lesson = models.ForeignKey(
-        "materials.Lesson",  # ✅ строковая ссылка вместо Lesson
+        "materials.Lesson",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -88,10 +89,44 @@ class Payment(models.Model):
     )
 
     amount = models.DecimalField(
-        max_digits=10, decimal_places=2, verbose_name="Сумма оплаты"
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Сумма оплаты",
     )
+
     method = models.CharField(
-        max_length=20, choices=PAYMENT_METHODS, verbose_name="Способ оплаты"
+        max_length=20,
+        choices=PAYMENT_METHODS,
+        verbose_name="Способ оплаты",
+    )
+
+    # --- Stripe поля ---
+    stripe_product_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="ID продукта Stripe",
+    )
+
+    stripe_price_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="ID цены Stripe",
+    )
+
+    stripe_session_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="ID сессии Stripe",
+    )
+
+    payment_url = models.CharField(
+        max_length=1000,
+        blank=True,
+        null=True,
+        verbose_name="Ссылка на оплату",
     )
 
     class Meta:
