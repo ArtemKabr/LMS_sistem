@@ -1,15 +1,9 @@
+# users/serializers.py — сериализаторы пользователей
+
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Payment
 
 User = get_user_model()
-
-
-class PaymentSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Payment."""
-    class Meta:
-        model = Payment
-        fields = "__all__"
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,12 +14,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    """Сериализатор профиля пользователя с историей платежей."""
-    payments = PaymentSerializer(many=True, read_only=True)
+    """Сериализатор профиля пользователя (без платежей)."""
 
     class Meta:
         model = User
-        fields = ("id", "email", "payments")
+        fields = ["id", "email", "phone", "city", "avatar"]
 
 
 class PublicUserSerializer(serializers.ModelSerializer):
@@ -44,8 +37,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ["email", "password"]
 
     def create(self, validated_data):
-        user = User.objects.create_user(
+        return User.objects.create_user(
             email=validated_data["email"],
             password=validated_data["password"],
         )
-        return user
