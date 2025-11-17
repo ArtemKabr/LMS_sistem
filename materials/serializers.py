@@ -1,14 +1,14 @@
+# materials/serializers.py — сериализаторы курсов, уроков и платежей
+
 from rest_framework import serializers
-from .models import Course, Lesson, Subscription
+from .models import Course, Lesson, Subscription, Payment
 from .validators import validate_youtube_url
-from .models import Course, Lesson
 
 
 class LessonSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели урока"""
+    """Сериализатор урока"""
 
     owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
-
     video_url = serializers.CharField(
         required=False,
         allow_blank=True,
@@ -21,19 +21,12 @@ class LessonSerializer(serializers.ModelSerializer):
 
 
 class CourseSerializer(serializers.ModelSerializer):
-    """
-    Сериализатор для модели курса.
-    Добавлены:
-    - email автора (author_email)
-    - количество уроков (lessons_count)
-    - список уроков (lessons)
-    """
+    """Сериализатор курса"""
+
     author_email = serializers.SerializerMethodField()
     lessons_count = serializers.SerializerMethodField()
-    lessons = LessonSerializer(many=True, source="lesson_set", read_only=True)
-    is_subscribed = serializers.SerializerMethodField(
-        help_text="Пользователь подписан?"
-    )
+    lessons = LessonSerializer(many=True, read_only=True)
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
@@ -50,15 +43,12 @@ class CourseSerializer(serializers.ModelSerializer):
         ]
 
     def get_author_email(self, obj):
-        """Возвращает email автора, если он есть."""
         return obj.author.email if obj.author else None
 
     def get_lessons_count(self, obj):
-        """Подсчитывает количество уроков в курсе"""
         return obj.lessons.count()
 
     def get_is_subscribed(self, obj):
-        """Проверяет, подписан ли текущий пользователь на курс"""
         request = self.context.get("request")
         user = getattr(request, "user", None)
         if not user or not user.is_authenticated:
@@ -67,8 +57,9 @@ class CourseSerializer(serializers.ModelSerializer):
 
 
 class CourseDetailSerializer(serializers.ModelSerializer):
-    """Сериализатор курса с уроками и количеством"""
-    lessons = LessonSerializer(many=True, source="lesson_set", read_only=True)
+    """Детальный сериализатор курса"""
+
+    lessons = LessonSerializer(many=True, read_only=True)
     lessons_count = serializers.SerializerMethodField()
 
     class Meta:
@@ -76,5 +67,20 @@ class CourseDetailSerializer(serializers.ModelSerializer):
         fields = ("id", "title", "description", "lessons_count", "lessons")
 
     def get_lessons_count(self, obj):
-        """Возвращает количество уроков в курсе"""
         return obj.lessons.count()
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    """Сериализатор платежа"""
+
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Payment
+        fields = "__all__"
+        read_only_fields = (
+            "stripe_product_id",
+            "stripe_price_id",
+            "stripe_session_id",
+            "payment_url",
+        )
