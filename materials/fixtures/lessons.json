@@ -1,0 +1,12 @@
+[
+  {
+    "model": "materials.lesson",
+    "pk": 1,
+    "fields": {
+      "title": "Введение в Django",
+      "description": "Основные понятия и структура проекта",
+      "course": 1,
+      "video_url": "https://example.com/django-intro"
+    }
+  }
+]

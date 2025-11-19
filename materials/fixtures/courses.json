@@ -1,0 +1,12 @@
+[
+  {
+    "model": "materials.course",
+    "pk": 1,
+    "fields": {
+      "title": "Python Django",
+      "description": "Полный курс по Django",
+      "preview": "",
+      "author": 1
+    }
+  }
+]

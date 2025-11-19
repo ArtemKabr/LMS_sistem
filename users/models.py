@@ -1,3 +1,5 @@
+# users/models.py — модели приложения пользователей
+
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 
@@ -8,6 +10,7 @@ class UserManager(BaseUserManager):
     use_in_migrations = True
 
     def create_user(self, email, password=None, **extra_fields):
+        """Создание обычного пользователя"""
         if not email:
             raise ValueError("У пользователя должен быть указан email")
         email = self.normalize_email(email)
@@ -25,8 +28,7 @@ class UserManager(BaseUserManager):
         if extra_fields.get("is_staff") is not True:
             raise ValueError("Суперпользователь должен иметь is_staff=True.")
         if extra_fields.get("is_superuser") is not True:
-            raise ValueError(
-                "Суперпользователь должен иметь is_superuser=True.")
+            raise ValueError("Суперпользователь должен иметь is_superuser=True.")
 
         return self.create_user(email, password, **extra_fields)
 
