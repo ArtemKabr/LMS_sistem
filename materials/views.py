@@ -2,6 +2,7 @@
 
 from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated, AllowAny
+
 from users.permissions import IsModer, IsOwner
 from .models import Course, Lesson, Payment
 from .serializers import CourseSerializer, LessonSerializer, PaymentSerializer
@@ -11,6 +12,9 @@ from .services.stripe_service import (
     create_stripe_price,
     create_checkout_session,
 )
+
+# Celery-задачи (я добавил)
+from materials.tasks import send_course_update_email, send_course_update_if_old
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -30,6 +34,20 @@ class CourseViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Связываем курс с пользователем."""
         serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):  # (я добавил)
+        """
+        При обновлении курса отправляем уведомления подписчикам:
+        1) обычная рассылка
+        2) доп. задание — отправка только если курс не обновлялся > 4 часов
+        """
+        course = serializer.save()
+
+        # Асинхронная отправка уведомления подписчикам (я добавил)
+        send_course_update_email.delay(course.id)
+
+        # Условная отправка при старом обновлении (я добавил)
+        send_course_update_if_old.delay(course.id)
 
     def get_permissions(self):
         """Задаём права на действия."""
@@ -60,6 +78,17 @@ class LessonViewSet(viewsets.ModelViewSet):
         """Привязываем урок к автору."""
         serializer.save(owner=self.request.user)
 
+    def perform_update(self, serializer):  # (я добавил)
+        """
+        При обновлении урока выполняем доп. условие:
+        отправлять уведомление только если курс не обновлялся > 4 часов.
+        """
+        lesson = serializer.save()
+        course_id = lesson.course.id
+
+        # Отправка по доп. условию (я добавил)
+        send_course_update_if_old.delay(course_id)
+
     def get_permissions(self):
         if self.action in ["list", "retrieve"]:
             return [IsAuthenticated()]
@@ -78,7 +107,9 @@ class PaymentCreateAPIView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
-        """Создаём локальный объект + продукт Stripe + цену + сессию."""
+        """
+        Создаём локальный объект + продукт Stripe + цену + сессию.
+        """
         payment = serializer.save()
 
         stripe_product_id = create_stripe_product(payment.course)

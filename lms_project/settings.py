@@ -17,6 +17,8 @@ from dotenv import load_dotenv
 
 from datetime import timedelta
 
+from celery.schedules import crontab
+
 load_dotenv()
 
 
@@ -63,6 +65,7 @@ INSTALLED_APPS = [
     "users",
     "materials",
     "drf_spectacular",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -170,4 +173,21 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Документация для LMS проекта",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+}
+
+
+CELERY_BROKER_URL = os.getenv("REDIS_URL")
+CELERY_RESULT_BACKEND = os.getenv("REDIS_URL")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Europe/Moscow"
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+
+CELERY_BEAT_SCHEDULE = {
+    "deactivate-inactive-users-every-day": {
+        "task": "users.tasks.deactivate_inactive_users",
+        "schedule": crontab(hour=3, minute=0),  # каждый день в 03:00
+    },
 }
